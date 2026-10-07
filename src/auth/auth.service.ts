@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import * as bcrypt from 'bcryptjs';
+import { UpdateProfileDto } from '../users/dto/profile.dto';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { GuestDto, LoginDto, RegisterDto } from './dto/auth.dto';
@@ -115,11 +116,21 @@ export class AuthService {
     };
   }
 
+  async updateProfile(user: User, dto: UpdateProfileDto) {
+    await this.users.save({
+      id: user.id,
+      ...(dto.displayName !== undefined && { displayName: dto.displayName }),
+      ...(dto.avatarId !== undefined && { avatarId: dto.avatarId }),
+    });
+    return this.publicUser(await this.users.findById(user.id) as User);
+  }
+
   publicUser(user: User) {
     return {
       id: user.id,
       email: user.email,
       displayName: user.displayName,
+      avatarId: user.avatarId,
       isGuest: user.isGuest,
     };
   }

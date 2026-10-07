@@ -85,6 +85,7 @@ export class RecordsService {
       .innerJoin('r.user', 'u')
       .select('u.id', 'userId')
       .addSelect('u.display_name', 'displayName')
+      .addSelect('u.avatar_id', 'avatarId')
       .addSelect('MIN(r.attempts)', 'bestAttempts')
       .addSelect('MIN(r.created_at)', 'firstAchievedAt')
       .where('r.digits = :digits AND r.verified = true', { digits })
@@ -96,6 +97,7 @@ export class RecordsService {
     return rows.map((row, i) => ({
       rank: i + 1,
       displayName: row.displayName,
+      avatarId: row.avatarId,
       attempts: Number(row.bestAttempts),
     }));
   }

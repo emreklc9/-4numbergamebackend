@@ -17,6 +17,9 @@ export class User {
   @Column({ name: 'display_name', type: 'varchar', length: 30 })
   displayName: string;
 
+  @Column({ name: 'avatar_id', type: 'varchar', length: 20, default: 'fox' })
+  avatarId: string;
+
   @Column({ name: 'is_guest', default: false })
   isGuest: boolean;
 

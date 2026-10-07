@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { User } from '../users/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import { GoogleLoginDto, GuestDto, LoginDto, RegisterDto } from './dto/auth.dto';
+import { UpdateProfileDto } from '../users/dto/profile.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -48,5 +49,11 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: User) {
     return this.auth.publicUser(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  async updateProfile(@CurrentUser() user: User, @Body() dto: UpdateProfileDto) {
+    return this.auth.updateProfile(user, dto);
   }
 }
