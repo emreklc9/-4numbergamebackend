@@ -3,7 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { User } from '../users/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
-import { GoogleLoginDto, GuestDto, LoginDto, RefreshDto, RegisterDto } from './dto/auth.dto';
+import { ChangePasswordDto, GoogleLoginDto, GuestDto, LoginDto, RefreshDto, RegisterDto } from './dto/auth.dto';
 import { UpdateProfileDto } from '../users/dto/profile.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -53,6 +53,12 @@ export class AuthController {
   @Post('upgrade')
   upgrade(@CurrentUser() user: User, @Body() dto: RegisterDto) {
     return this.auth.upgrade(user, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('password')
+  changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
+    return this.auth.changePassword(user, dto);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { UpdateProfileDto } from '../users/dto/profile.dto';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { RefreshToken } from './refresh-token.entity';
-import { GuestDto, LoginDto, RegisterDto } from './dto/auth.dto';
+import { ChangePasswordDto, GuestDto, LoginDto, RegisterDto } from './dto/auth.dto';
 
 const BCRYPT_ROUNDS = 12;
 // Kullanıcı yoksa da bcrypt çalıştırılır; böylece yanıt süresi e-posta varlığını sızdırmaz.
@@ -167,6 +167,29 @@ export class AuthService {
       { revokedAt: new Date() },
     );
     return { ok: true };
+  }
+
+  // Başarılı değişimde tüm eski oturumlar kapanır; yeni oturum döndürülür.
+  async changePassword(current: User, dto: ChangePasswordDto) {
+    const user = await this.users.findByIdWithPassword(current.id);
+    if (!user?.passwordHash) {
+      throw new BadRequestException('Bu hesapta şifre yok (Google veya misafir hesabı)');
+    }
+    if (!(await bcrypt.compare(dto.currentPassword, user.passwordHash))) {
+      throw new UnauthorizedException('Mevcut şifre hatalı');
+    }
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException('Yeni şifre mevcut şifreden farklı olmalı');
+    }
+    await this.users.save({
+      id: user.id,
+      passwordHash: await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS),
+    });
+    await this.refreshTokens.update(
+      { userId: user.id, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+    return this.session(user);
   }
 
   async updateProfile(user: User, dto: UpdateProfileDto) {
