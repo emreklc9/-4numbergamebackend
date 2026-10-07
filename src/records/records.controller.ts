@@ -21,7 +21,7 @@ export class RecordsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('records/offline')
   offline(@CurrentUser() user: User, @Body() dto: OfflineBatchDto) {
-    return this.records.addOfflineBatch(user.id, dto.records);
+    return this.records.addOfflineBatch(user.id, dto.records, dto.spends);
   }
 
   @Get('leaderboard')

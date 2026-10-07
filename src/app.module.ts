@@ -8,6 +8,7 @@ import { validateEnv } from './config/env.validation';
 import { GamesModule } from './games/games.module';
 import { HealthController } from './health/health.controller';
 import { RecordsModule } from './records/records.module';
+import { WalletModule } from './wallet/wallet.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     RecordsModule,
     GamesModule,
+    WalletModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

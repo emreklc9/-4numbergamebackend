@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
-  ArrayMinSize,
   IsArray,
+  IsOptional,
   IsDateString,
   IsIn,
   IsInt,
@@ -36,11 +36,28 @@ export class OfflineRecordDto {
   playedAt: string;
 }
 
+export class OfflineSpendDto {
+  @IsUUID()
+  clientId: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  amount: number;
+}
+
 export class OfflineBatchDto {
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
   @ArrayMaxSize(50)
   @ValidateNested({ each: true })
   @Type(() => OfflineRecordDto)
-  records: OfflineRecordDto[];
+  records: OfflineRecordDto[] = [];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => OfflineSpendDto)
+  spends: OfflineSpendDto[] = [];
 }

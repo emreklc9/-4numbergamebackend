@@ -4,6 +4,8 @@ import { DataSource } from 'typeorm';
 import { GameRecord } from '../records/game-record.entity';
 import { Game } from './game.entity';
 import { randomInt } from 'node:crypto';
+import { applyGold, currentGold } from '../wallet/wallet.service';
+import { ELIMINATE_HINT_COST, REVEAL_HINT_COST, winReward } from '../wallet/wallet.constants';
 import { evaluateGuess, generateSecret, validateGuess } from './game-logic';
 
 export const MAX_ATTEMPTS = 100;
@@ -48,24 +50,29 @@ export class GamesService {
       if (game.status !== 'active') game.finishedAt = new Date();
       await manager.save(game);
 
+      let goldEarned = 0;
       if (won) {
         await manager.save(
           manager.create(GameRecord, { userId, digits: game.digits, attempts }),
         );
+        goldEarned = winReward(attempts);
+        await applyGold(manager, userId, goldEarned, 'win', `win:${game.id}`);
       }
+      const gold = await currentGold(manager, userId);
 
       return {
         id: game.id,
         status: game.status,
         attempts,
         feedback,
+        gold,
+        goldEarned,
         ...(game.status !== 'active' && { secret: game.secret }),
       };
     });
   }
 
-  // Gizli sayı sunucuda kaldığı için ipuçları da sunucudan alınır. Altın istemcide tutulduğundan
-  // maliyet düşümü şimdilik istemcide; sunucu yalnızca oyun başına ipucu sayısını sınırlar.
+  // Gizli sayı sunucuda kaldığı için ipuçları da sunucudan alınır; maliyet aynı işlemde bakiyeden düşer.
   async hint(userId: string, gameId: string, type: 'reveal' | 'eliminate') {
     return this.db.transaction(async (manager) => {
       const game = await manager.findOne(Game, {
@@ -80,6 +87,14 @@ export class GamesService {
         throw new ConflictException('Bu oyun için ipucu hakkın bitti');
       }
 
+      const hintNumber = hints.revealed.length + hints.eliminated.length + 1;
+      const gold = await applyGold(
+        manager,
+        userId,
+        -(type === 'reveal' ? REVEAL_HINT_COST : ELIMINATE_HINT_COST),
+        'hint',
+        `hint:${game.id}:${hintNumber}`,
+      );
       let result: { type: 'reveal'; index: number; digit: string } | { type: 'eliminate'; digit: string };
       if (type === 'reveal') {
         const options = [...Array(game.digits).keys()].filter((i) => !hints.revealed.includes(i));
@@ -98,7 +113,7 @@ export class GamesService {
       }
       game.hints = hints;
       await manager.save(game);
-      return result;
+      return { ...result, gold };
     });
   }
 

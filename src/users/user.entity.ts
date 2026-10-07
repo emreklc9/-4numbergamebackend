@@ -20,6 +20,9 @@ export class User {
   @Column({ name: 'is_guest', default: false })
   isGuest: boolean;
 
+  @Column({ type: 'int', default: 0 })
+  gold: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
