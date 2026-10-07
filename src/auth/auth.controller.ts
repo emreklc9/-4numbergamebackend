@@ -3,7 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { User } from '../users/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
-import { GoogleLoginDto, GuestDto, LoginDto, RegisterDto } from './dto/auth.dto';
+import { GoogleLoginDto, GuestDto, LoginDto, RefreshDto, RegisterDto } from './dto/auth.dto';
 import { UpdateProfileDto } from '../users/dto/profile.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -25,6 +25,16 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
+  }
+
+  @Post('refresh')
+  refresh(@Body() dto: RefreshDto) {
+    return this.auth.refresh(dto.refreshToken);
+  }
+
+  @Post('logout')
+  logout(@Body() dto: RefreshDto) {
+    return this.auth.logout(dto.refreshToken);
   }
 
   @Post('google')

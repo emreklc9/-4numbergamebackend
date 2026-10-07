@@ -7,6 +7,7 @@ export interface Env {
   DB_NAME: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
+  GUEST_RETENTION_DAYS: number;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET?: string;
 }
@@ -28,7 +29,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     DB_PASSWORD: String(raw.DB_PASSWORD),
     DB_NAME: String(raw.DB_NAME),
     JWT_SECRET: String(raw.JWT_SECRET),
-    JWT_EXPIRES_IN: String(raw.JWT_EXPIRES_IN ?? '1d'),
+    JWT_EXPIRES_IN: String(raw.JWT_EXPIRES_IN ?? '1h'),
+    // 0 veya negatif: misafir temizliği kapalı.
+    GUEST_RETENTION_DAYS: Number(raw.GUEST_RETENTION_DAYS ?? 180),
     GOOGLE_CLIENT_ID: String(raw.GOOGLE_CLIENT_ID),
     GOOGLE_CLIENT_SECRET: raw.GOOGLE_CLIENT_SECRET ? String(raw.GOOGLE_CLIENT_SECRET) : undefined,
   };

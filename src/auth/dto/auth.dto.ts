@@ -45,3 +45,10 @@ export class GuestDto {
   @MaxLength(30)
   displayName?: string;
 }
+
+export class RefreshDto {
+  @IsString()
+  @MinLength(20)
+  @MaxLength(200)
+  refreshToken: string;
+}
