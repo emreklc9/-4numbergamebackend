@@ -3,7 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../users/user.entity';
-import { CreateGameDto, GuessDto } from './dto/games.dto';
+import { CreateGameDto, GuessDto, HintDto } from './dto/games.dto';
 import { GamesService } from './games.service';
 
 @UseGuards(JwtAuthGuard)
@@ -29,5 +29,10 @@ export class GamesController {
     @Body() dto: GuessDto,
   ) {
     return this.games.guess(user.id, id, dto.guess);
+  }
+
+  @Post(':id/hints')
+  hint(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string, @Body() dto: HintDto) {
+    return this.games.hint(user.id, id, dto.type);
   }
 }

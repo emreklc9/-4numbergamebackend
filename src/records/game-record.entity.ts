@@ -11,6 +11,7 @@ import { User } from '../users/user.entity';
 
 @Entity('game_records')
 @Index(['digits', 'attempts'])
+@Index(['userId', 'clientId'], { unique: true })
 export class GameRecord {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -28,6 +29,17 @@ export class GameRecord {
 
   @Column({ type: 'smallint' })
   attempts: number;
+
+  // false: çevrimdışı oynanmış, sunucunun doğrulayamadığı rekor. Liderlik tablosunda sayılmaz.
+  @Column({ default: true })
+  verified: boolean;
+
+  // Toplu yüklemede tekrar gönderimi (çift kayıt) engelleyen istemci kimliği.
+  @Column({ name: 'client_id', type: 'varchar', length: 64, nullable: true })
+  clientId: string | null;
+
+  @Column({ name: 'played_at', type: 'timestamptz', nullable: true })
+  playedAt: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -3,11 +3,13 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { GameRecord } from '../records/game-record.entity';
 import { Game } from './game.entity';
+import { randomInt } from 'node:crypto';
 import { evaluateGuess, generateSecret, validateGuess } from './game-logic';
 
 export const MAX_ATTEMPTS = 100;
 // Kullanıcı başına eşzamanlı açık oyun sınırı; sınırsız oyun üretimini engeller.
 const MAX_ACTIVE_GAMES = 10;
+const MAX_HINTS_PER_GAME = 12;
 
 @Injectable()
 export class GamesService {
@@ -59,6 +61,44 @@ export class GamesService {
         feedback,
         ...(game.status !== 'active' && { secret: game.secret }),
       };
+    });
+  }
+
+  // Gizli sayı sunucuda kaldığı için ipuçları da sunucudan alınır. Altın istemcide tutulduğundan
+  // maliyet düşümü şimdilik istemcide; sunucu yalnızca oyun başına ipucu sayısını sınırlar.
+  async hint(userId: string, gameId: string, type: 'reveal' | 'eliminate') {
+    return this.db.transaction(async (manager) => {
+      const game = await manager.findOne(Game, {
+        where: { id: gameId, userId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!game) throw new NotFoundException('Oyun bulunamadı');
+      if (game.status !== 'active') throw new ConflictException('Oyun zaten bitti');
+
+      const hints = game.hints ?? { revealed: [], eliminated: [] };
+      if (hints.revealed.length + hints.eliminated.length >= MAX_HINTS_PER_GAME) {
+        throw new ConflictException('Bu oyun için ipucu hakkın bitti');
+      }
+
+      let result: { type: 'reveal'; index: number; digit: string } | { type: 'eliminate'; digit: string };
+      if (type === 'reveal') {
+        const options = [...Array(game.digits).keys()].filter((i) => !hints.revealed.includes(i));
+        if (options.length === 0) throw new ConflictException('Açılabilecek bir hane kalmadı');
+        const index = options[randomInt(options.length)];
+        hints.revealed.push(index);
+        result = { type, index, digit: game.secret[index] };
+      } else {
+        const options = '0123456789'
+          .split('')
+          .filter((d) => !game.secret.includes(d) && !hints.eliminated.includes(d));
+        if (options.length === 0) throw new ConflictException('İşaretlenecek rakam kalmadı');
+        const digit = options[randomInt(options.length)];
+        hints.eliminated.push(digit);
+        result = { type, digit };
+      }
+      game.hints = hints;
+      await manager.save(game);
+      return result;
     });
   }
 

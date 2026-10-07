@@ -12,3 +12,8 @@ export class GuessDto {
   @MaxLength(5)
   guess: string;
 }
+
+export class HintDto {
+  @IsIn(['reveal', 'eliminate'])
+  type: 'reveal' | 'eliminate';
+}

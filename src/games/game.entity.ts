@@ -10,6 +10,7 @@ import {
 import { User } from '../users/user.entity';
 
 export type GameStatus = 'active' | 'won' | 'lost';
+export type StoredHints = { revealed: number[]; eliminated: string[] };
 export type StoredGuess = { guess: string; plus: number; minus: number };
 
 @Entity('games')
@@ -34,6 +35,9 @@ export class Game {
 
   @Column({ type: 'jsonb', default: () => "'[]'" })
   guesses: StoredGuess[];
+
+  @Column({ type: 'jsonb', default: () => `'{"revealed":[],"eliminated":[]}'` })
+  hints: StoredHints;
 
   @Column({ type: 'varchar', length: 10, default: 'active' })
   status: GameStatus;
