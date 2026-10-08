@@ -52,6 +52,7 @@ export class GuestCleanupService implements OnModuleInit, OnModuleDestroy {
         const ids = stale.map((row) => row.id);
         // Oyunlar ve rekorlar FK ile silinir; diğer tablolarda FK olmadığından açıkça temizlenir.
         await manager.query('DELETE FROM gold_transactions WHERE user_id = ANY($1)', [ids]);
+        await manager.query('DELETE FROM pvp_matches WHERE player1_id = ANY($1) OR player2_id = ANY($1)', [ids]);
         await manager.query('DELETE FROM user_stores WHERE user_id = ANY($1)', [ids]);
         await manager.query('DELETE FROM refresh_tokens WHERE user_id = ANY($1)', [ids]);
         await manager.query('DELETE FROM users WHERE id = ANY($1)', [ids]);

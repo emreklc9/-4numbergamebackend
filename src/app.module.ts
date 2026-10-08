@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { validateEnv } from './config/env.validation';
 import { GamesModule } from './games/games.module';
 import { HealthController } from './health/health.controller';
+import { PvpModule } from './pvp/pvp.module';
 import { RecordsModule } from './records/records.module';
 import { WalletModule } from './wallet/wallet.module';
 import { UsersModule } from './users/users.module';
@@ -34,6 +35,7 @@ import { UsersModule } from './users/users.module';
     RecordsModule,
     GamesModule,
     WalletModule,
+    PvpModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
