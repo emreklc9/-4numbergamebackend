@@ -14,6 +14,7 @@ export const CATALOG: CatalogItem[] = [
   { id: 'effect-confetti', price: 0, type: 'effect', value: 'confetti' },
   { id: 'theme-midnight', price: 30, type: 'theme', value: 'midnight' },
   { id: 'theme-sunset', price: 30, type: 'theme', value: 'sunset' },
+  { id: 'theme-escape', price: 0, type: 'theme', value: 'escape' },
   { id: 'keypad-mint', price: 20, type: 'keypad', value: 'mint' },
   { id: 'keypad-violet', price: 20, type: 'keypad', value: 'violet' },
   { id: 'effect-golden', price: 50, type: 'effect', value: 'golden' },

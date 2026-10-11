@@ -22,7 +22,8 @@ export class PvpMatch {
   @Column({ type: 'smallint' })
   digits: number;
 
-  @Column({ type: 'varchar', length: 5 })
+  // Ortak sayıda 4 hane. Rakip modunda iki sayı `1234:5678` biçiminde durur.
+  @Column({ type: 'varchar', length: 9 })
   secret: string;
 
   @Column({ type: 'varchar', length: 12 })

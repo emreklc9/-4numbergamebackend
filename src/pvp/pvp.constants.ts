@@ -1,4 +1,5 @@
 export const PVP_DIGITS = 4;
 export const PVP_WIN_GOLD = 15;
-// Bağlantı kopması ve tahminsiz bekleme süresi.
-export const PVP_TIMEOUT_MS = Number(process.env.PVP_TIMEOUT_MS) || 60_000;
+// Tahmin yapmadan beklenebilecek süre ve kopan oyuncunun dönüş süresi.
+export const PVP_IDLE_MS = Number(process.env.PVP_IDLE_MS) || 30_000;
+export const PVP_DISCONNECT_MS = Number(process.env.PVP_DISCONNECT_MS) || 60_000;
